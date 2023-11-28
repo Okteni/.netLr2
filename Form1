@@ -1,0 +1,417 @@
+
+
+using static System.Windows.Forms.VisualStyles.VisualStyleElement.ListView;
+using System.Net;
+using System.Windows.Forms;
+using Microsoft.EntityFrameworkCore;
+
+namespace WinFormsApp1
+{
+    public partial class Form1 : Form
+    {
+
+        private BookStoreContext _context;
+
+        public Form1()
+        {
+            InitializeComponent();
+            _context = new BookStoreContext();
+        }
+
+        private void MainForm_Load(object sender, EventArgs e)
+        {
+            LoadBooks();
+            LoadCustomers();
+            LoadOrders();
+            LoadOrderDetails();
+        }
+
+        private void LoadBooks()
+        {
+            var books = _context.Books
+        .ToList();
+
+            BookDataGridView.DataSource = books;
+
+        }
+
+        private void LoadCustomers()
+        {
+            var customers = _context.Customers.ToList();
+            CustomersDataGridView.DataSource = customers;
+        }
+
+        private void LoadOrders()
+        {
+            var orders = _context.Orders.ToList();
+            OrdersDataGridView.DataSource = orders;
+        }
+
+        private void LoadOrderDetails()
+        {
+            var orderdetails = _context.OrderDetails.ToList();
+            OrderDetailsDataGridView.DataSource = orderdetails;
+        }
+
+        private void AddBookButton_Click(object sender, EventArgs e)
+        {
+            
+            var newBook = new Book
+            {
+                Title = titleTextBox.Text,
+                Author = authorTextBox.Text,
+                Genre = genreTextBox.Text,
+                Year = Convert.ToInt32(yearTextBox.Text),
+                Publisher = publisherTextBox.Text,
+                Price = Convert.ToDecimal(priceTextBox.Text)
+
+            };
+
+
+            _context.Books.Add(newBook);
+            _context.SaveChanges();
+
+            
+            LoadBooks();
+        }
+
+        private void UpdateBookButton_Click(object sender, EventArgs e)
+        {
+
+          
+            if (BookDataGridView.SelectedRows.Count > 0)
+            {
+                var selectedBook = BookDataGridView.SelectedRows[0].DataBoundItem as Book;
+
+                if (selectedBook != null)
+                {
+                    
+                    selectedBook.Title = titleTextBox.Text;
+                    selectedBook.Author = authorTextBox.Text;
+                    selectedBook.Genre = genreTextBox.Text;
+                    selectedBook.Year = Convert.ToInt32(yearTextBox.Text);
+                    selectedBook.Publisher = publisherTextBox.Text;
+                    selectedBook.Price = Convert.ToDecimal(priceTextBox.Text);
+
+                   
+                    _context.SaveChanges();
+
+                   
+                    LoadBooks();
+                }
+            }
+        }
+
+        private void DeleteBookButton_Click(object sender, EventArgs e)
+        {
+            
+            if (BookDataGridView.SelectedRows.Count > 0)
+            {
+                var selectedBook = BookDataGridView.SelectedRows[0].DataBoundItem as Book;
+
+                if (selectedBook != null)
+                {
+                    _context.Books.Remove(selectedBook);
+                    _context.SaveChanges();
+
+                    
+                    LoadBooks();
+                }
+            }
+        }
+
+        private void AddCustomerButton_Click(object sender, EventArgs e)
+        {
+           
+            var newCustomer = new Customer
+            {
+                FirstName = FirstNameTextBox.Text,
+                LastName = LastNameTextBox.Text,
+                Email = EmailTextBox.Text,
+                Address = AddressTextBox.Text,
+                PhoneNumber = PhoneNumberTextBox.Text,
+
+            };
+
+
+          
+            _context.Customers.Add(newCustomer);
+            _context.SaveChanges();
+
+            
+            LoadCustomers();
+        }
+
+        private void UpdateCustomerButton_Click(object sender, EventArgs e)
+        {
+
+           
+            if (CustomersDataGridView.SelectedRows.Count > 0)
+            {
+                var selectedCustomer = CustomersDataGridView.SelectedRows[0].DataBoundItem as Customer;
+
+                if (selectedCustomer != null)
+                {
+                    
+                    selectedCustomer.FirstName = FirstNameTextBox.Text;
+                    selectedCustomer.LastName = LastNameTextBox.Text;
+                    selectedCustomer.Email = EmailTextBox.Text;
+                    selectedCustomer.Address = AddressTextBox.Text;
+                    selectedCustomer.PhoneNumber = PhoneNumberTextBox.Text;
+
+                 
+                    _context.SaveChanges();
+
+                    
+                    LoadCustomers();
+                }
+            }
+        }
+
+        private void DeleteCustomerButton_Click(object sender, EventArgs e)
+        {
+           
+            if (CustomersDataGridView.SelectedRows.Count > 0)
+            {
+                var selectedCustomer = CustomersDataGridView.SelectedRows[0].DataBoundItem as Customer;
+
+                if (selectedCustomer != null)
+                {
+                    _context.Customers.Remove(selectedCustomer);
+                    _context.SaveChanges();
+
+                    // Поновлення списку книг у DataGridView
+                    LoadCustomers();
+                }
+            }
+        }
+
+        private Customer selectedCustomer;
+
+        private void CustomersDataGridView_SelectionChanged(object sender, EventArgs e)
+        {
+            if (CustomersDataGridView.SelectedRows.Count > 0)
+            {
+                selectedCustomer = CustomersDataGridView.SelectedRows[0].DataBoundItem as Customer;
+            }
+            else
+            {
+                selectedCustomer = null;
+            }
+        }
+
+        private Book selectedBook;
+
+        private void BookDataGridView_SelectionChanged(object sender, EventArgs e)
+        {
+            if (BookDataGridView.SelectedRows.Count > 0)
+            {
+                selectedBook = BookDataGridView.SelectedRows[0].DataBoundItem as Book;
+            }
+            else
+            {
+                selectedBook = null;
+            }
+        }
+
+        private Order selectedOrder;
+
+        private void OrdersDataGridView_SelectionChanged(object sender, EventArgs e)
+        {
+            if (OrdersDataGridView.SelectedRows.Count > 0)
+            {
+                selectedOrder = OrdersDataGridView.SelectedRows[0].DataBoundItem as Order;
+            }
+            else
+            {
+                selectedOrder = null;
+            }
+        }
+
+        private void AddOrderButton_Click(object sender, EventArgs e)
+        {
+
+            if (selectedCustomer != null)
+            {
+
+                var newOrder = new Order
+                {
+                    CustomerId = selectedCustomer.CustomerId, і
+                    Date = DateTime.UtcNow,
+                    Status = StatusTextBox.Text,
+                    TotalAmount = Convert.ToDecimal(TotalAmountTextBox.Text)
+
+                };
+
+                _context.Orders.Add(newOrder);
+                _context.SaveChanges();
+
+                LoadOrders();
+            }
+
+        }
+
+
+        private void DeleteOrderButton_Click(object sender, EventArgs e)
+        {
+            
+            if (OrdersDataGridView.SelectedRows.Count > 0)
+            {
+                var selectedOrder = OrdersDataGridView.SelectedRows[0].DataBoundItem as Order;
+
+                if (selectedOrder != null)
+                {
+                    _context.Orders.Remove(selectedOrder);
+                    _context.SaveChanges();
+
+                   
+                    LoadOrders();
+                }
+            }
+        }
+
+        private void UpdateOrderButton_Click(object sender, EventArgs e)
+        {
+           
+            if (OrdersDataGridView.SelectedRows.Count > 0)
+            {
+              
+                var selectedOrder = OrdersDataGridView.SelectedRows[0].DataBoundItem as Order;
+
+                if (selectedOrder != null)
+                {
+                   
+                    selectedOrder.Status = StatusTextBox.Text; 
+                    selectedOrder.TotalAmount = Convert.ToDecimal(TotalAmountTextBox.Text); 
+
+                    _context.SaveChanges(); 
+
+                    LoadOrders(); 
+                }
+            }
+        }
+
+
+        private void AddOrderDetailButton_Click(object sender, EventArgs e)
+        {
+
+            if (selectedOrder != null & selectedBook != null)
+            {
+
+                var newOrderDetail = new OrderDetail
+                {
+                    OrderId = selectedOrder.OrderId,
+                    BookId = selectedBook.BookId,
+                    Quantity = Convert.ToInt32(QuantityTextBox.Text),
+                    Price = Convert.ToDecimal(PricTextBox.Text)
+
+                };
+
+                _context.OrderDetails.Add(newOrderDetail);
+                _context.SaveChanges();
+
+                LoadOrderDetails();
+            }
+
+        }
+
+        private void UpdateOrderDetailButton_Click(object sender, EventArgs e)
+        {
+            
+            if (OrderDetailsDataGridView.SelectedRows.Count > 0)
+            {
+                
+                var selectedOrderDetail = OrderDetailsDataGridView.SelectedRows[0].DataBoundItem as OrderDetail;
+
+                if (selectedOrder != null)
+                {
+                    
+                    selectedOrderDetail.Quantity = Convert.ToInt32(QuantityTextBox.Text); 
+                    selectedOrderDetail.Price = Convert.ToDecimal(PricTextBox.Text); 
+
+                    _context.SaveChanges(); 
+
+                    LoadOrderDetails(); 
+                }
+            }
+        }
+
+        private void DeleteOrderDetailButton_Click(object sender, EventArgs e)
+        {
+            // Видалення вибраної книги
+            if (OrderDetailsDataGridView.SelectedRows.Count > 0)
+            {
+                var selectedOrderDetail = OrderDetailsDataGridView.SelectedRows[0].DataBoundItem as OrderDetail;
+
+                if (selectedOrderDetail != null)
+                {
+                    _context.OrderDetails.Remove(selectedOrderDetail);
+                    _context.SaveChanges();
+
+                    // Поновлення списку книг у DataGridView
+                    LoadOrderDetails();
+                }
+            }
+        }
+
+
+        private void SortByPriceButton_Click(object sender, EventArgs e)
+        {
+            // Сортування книг за ціною (зростання)
+            var sortedBooks = _context.Books.OrderBy(book => book.Price).ToList();
+
+            // Або для сортування за ціною у спадаючому порядку:
+            // var sortedBooks = _context.Books.OrderByDescending(book => book.Price).ToList();
+
+            BookDataGridView.DataSource = sortedBooks;
+        }
+
+        private void SortByYearButton_Click(object sender, EventArgs e)
+        {
+            // Сортування книг за роком (зростання)
+            var sortedBooks = _context.Books.OrderBy(book => book.Year).ToList();
+
+            // Або для сортування за роком у спадаючому порядку:
+            // var sortedBooks = _context.Books.OrderByDescending(book => book.Year).ToList();
+
+            BookDataGridView.DataSource = sortedBooks;
+        }
+
+        private void BooksByPublisherButton_Click(object sender, EventArgs e)
+        {
+            var booksByPublisher = _context.Books
+                .Where(book => book.Publisher == "Publisher1")
+                .ToList();
+
+            BookDataGridView.DataSource = booksByPublisher;
+        }
+
+
+        private void BookWithOrderCountButton_Click(object sender, EventArgs e)
+        {
+            var booksWithOrderCount = _context.Books
+                .Select(book => new
+                {
+                    Book = book.Title,
+                    OrderCount = book.OrderDetails.Count()
+                })
+                .ToList();
+
+            OrdersDataGridView.DataSource = booksWithOrderCount;
+        }
+
+
+        private void TopSellingBooksButton_Click(object sender, EventArgs e)
+        {
+            var topSellingBooks = _context.OrderDetails
+            .GroupBy(detail => detail.Book)
+            .OrderByDescending(group => group.Sum(detail => detail.Quantity))
+            .Take(3)
+            .Select(group => group.Key)
+            .ToList();
+
+            OrderDetailsDataGridView.DataSource = topSellingBooks;
+        }
+
+    }
+}
